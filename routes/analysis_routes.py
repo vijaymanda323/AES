@@ -20,6 +20,10 @@ from fastapi import APIRouter, HTTPException, Query, status
 from analysis.avalanche    import compute_avalanche
 from analysis.comparison   import compute_comparison
 from analysis.entropy      import compute_entropy
+from analysis.nist_validation import (
+    run_nist_standard_tests,
+    run_dynamic_aes_validation,
+)
 from analysis.performance  import compute_performance
 from analysis.visualization import (
     build_entropy_histogram,
@@ -37,6 +41,7 @@ from schemas.analysis_models import (
     ByteFrequency,
     FullReportAvalanche,
     FullReportEntropy,
+    FullReportNistValidation,
     FullReportPerformance,
     FullReportResponse,
     FullReportVisualization,
@@ -44,6 +49,7 @@ from schemas.analysis_models import (
     KeyEvolutionVisualization,
     PerformanceResponse,
     PerformanceVisualization,
+    SecurityReport,
 )
 from services.crypto_service import (
     decrypt_dynamic,
@@ -285,6 +291,10 @@ async def full_report(body: AnalysisRequest) -> FullReportResponse:
         # ── Performance ────────────────────────────────────────────────────
         perf = compute_performance(plaintext, key)
 
+        # ── NIST Validation ────────────────────────────────────────────────
+        nist = run_nist_standard_tests()
+        dyn_val = run_dynamic_aes_validation(plaintext, key)
+
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
@@ -311,5 +321,11 @@ async def full_report(body: AnalysisRequest) -> FullReportResponse:
             avalanche_heatmap=avalanche["visualization"],
             entropy_histogram=entropy["visualization"],
             performance_chart=perf["visualization"],
+        ),
+        security_report=SecurityReport(
+            nist_validation=FullReportNistValidation(
+                standard_aes=nist["overall_status"],
+                dynamic_aes=dyn_val["encryption_decryption_consistency"],
+            )
         ),
     )

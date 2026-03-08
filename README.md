@@ -183,7 +183,7 @@ deactivate
 ### ✅ Health Check
 
 ```
-GET  http://localhost:8000/
+GET  http://127.0.0.1:8000/
 ```
 
 **Response:**

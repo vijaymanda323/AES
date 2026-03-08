@@ -18,8 +18,10 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.crypto_routes   import router as crypto_router
-from routes.analysis_routes import router as analysis_router
+from routes.crypto_routes      import router as crypto_router
+from routes.analysis_routes    import router as analysis_router
+from routes.validation_routes  import router as validation_router, user_router as user_validation_router
+from routes.round_analysis_routes import router as round_analysis_router
 
 # ---------------------------------------------------------------------------
 # Application metadata (appears in Swagger UI)
@@ -72,6 +74,9 @@ app.add_middleware(
 
 app.include_router(crypto_router)
 app.include_router(analysis_router)
+app.include_router(validation_router)
+app.include_router(user_validation_router)
+app.include_router(round_analysis_router)
 
 # ---------------------------------------------------------------------------
 # Root health-check

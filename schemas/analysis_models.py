@@ -202,13 +202,37 @@ class FullReportVisualization(BaseModel):
     performance_chart:   dict[str, Any] = Field(..., description="Performance bar-chart data.")
 
 
+# ---------------------------------------------------------------------------
+# NIST Validation (embedded in Full Report)
+# ---------------------------------------------------------------------------
+
+class FullReportNistValidation(BaseModel):
+    """Compact NIST validation summary included in the security report."""
+
+    standard_aes: str = Field(
+        ..., description='"PASS" if all NIST KAT vectors matched, else "FAIL".'
+    )
+    dynamic_aes: str = Field(
+        ..., description='"PASS" if Dynamic AES round-trip succeeded, else "FAIL".'
+    )
+
+
+class SecurityReport(BaseModel):
+    """Top-level security report section of the full report response."""
+
+    nist_validation: FullReportNistValidation
+
+
 class FullReportResponse(BaseModel):
     """Response from POST /analysis/full-report."""
 
     standard_ciphertext: str
     dynamic_ciphertext:  str
-    round_keys:   list[str]
-    avalanche:    FullReportAvalanche
-    entropy:      FullReportEntropy
-    performance:  FullReportPerformance
+    round_keys:    list[str]
+    avalanche:     FullReportAvalanche
+    entropy:       FullReportEntropy
+    performance:   FullReportPerformance
     visualization: FullReportVisualization
+    security_report: SecurityReport = Field(
+        ..., description="NIST validation summary and overall cryptographic correctness."
+    )
