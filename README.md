@@ -152,17 +152,15 @@ uvicorn main:app --reload
 
 | Flag | Meaning |
 |---|---|
-| `--reload` | Automatically restarts the server when you change a file |
-| `--host 0.0.0.0` | Makes it accessible from any device on your network |
-| `--port 8000` | The port number the server runs on |
+| `--reload` | Automatically restarts the server when you change a file 
 
 Once running, open your browser and visit:
 
 | Page | URL |
 |---|---|
-| 🟢 API is running check | http://localhost:8000 |
-| 📘 Interactive API docs (Swagger) | http://localhost:8000/docs |
-| 📗 Alternative API docs (ReDoc) | http://localhost:8000/redoc |
+| 🟢 API is running check | http://127.0.0.1:8000 |
+| 📘 Interactive API docs (Swagger) | http://127.0.0.1:8000/docs |
+| 📗 Alternative API docs (ReDoc) | http://127.0.0.1:8000/redoc |
 
 ---
 
