@@ -27,12 +27,14 @@ class AESRoundsRequest(BaseModel):
 # Trace State Response Models
 # ---------------------------------------------------------------------------
 
+StateMatrix = list[list[str]]
+
 class StandardRoundTrace(BaseModel):
     round: int
-    sub_bytes: str | None = None
-    shift_rows: str | None = None
-    mix_columns: str | None = None
-    add_round_key: str | None = None
+    sub_bytes: StateMatrix | None = None
+    shift_rows: StateMatrix | None = None
+    mix_columns: StateMatrix | None = None
+    add_round_key: StateMatrix | None = None
     round_key: str
 
 
@@ -40,10 +42,10 @@ class DynamicRoundTrace(BaseModel):
     round: int
     lfsr_output: str | None = None
     dynamic_round_key: str | None = None
-    sub_bytes: str | None = None
-    shift_rows: str | None = None
-    mix_columns: str | None = None
-    add_round_key: str | None = None
+    sub_bytes: StateMatrix | None = None
+    shift_rows: StateMatrix | None = None
+    mix_columns: StateMatrix | None = None
+    add_round_key: StateMatrix | None = None
 
 
 class StandardAESTrace(BaseModel):
@@ -60,8 +62,9 @@ class DynamicAESTrace(BaseModel):
 
 class VisualizationData(BaseModel):
     round_labels: list[str]
-    standard_states: list[str]
-    dynamic_states: list[str]
+    standard_keys: list[str]
+    dynamic_keys: list[str]
+    lfsr_values: list[str]
 
 
 # ---------------------------------------------------------------------------
@@ -99,8 +102,9 @@ class AESRoundsResponse(BaseModel):
                 },
                 "visualization": {
                     "round_labels": ["Round 0", "Round 1"],
-                    "standard_states": ["3243f6...", "d42711..."],
-                    "dynamic_states": ["123456...", "abcdef..."]
+                    "standard_keys": ["2b7e...", "a0fa..."],
+                    "dynamic_keys": ["123456...", "abcdef..."],
+                    "lfsr_values": ["000000...", "111111..."]
                 }
             }
         }

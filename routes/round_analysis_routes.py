@@ -41,8 +41,20 @@ def _normalize_key(key: str) -> str:
     return k_bytes.hex()
 
 
+def hex_to_state_matrix(hex_str: str | None) -> list[list[str]] | None:
+    if not hex_str or len(hex_str) != 32:
+        return None
+    matrix = [["", "", "", ""], ["", "", "", ""], ["", "", "", ""], ["", "", "", ""]]
+    for i in range(16):
+        byte_val = hex_str[i*2 : i*2+2]
+        row = i % 4
+        col = i // 4
+        matrix[row][col] = byte_val
+    return matrix
+
+
 @router.post(
-    "/aes-rounds",
+    "/aes-round-trace",
     response_model=AESRoundsResponse,
     status_code=status.HTTP_200_OK,
     summary="AES Round Analysis",
@@ -90,10 +102,10 @@ async def analyze_aes_rounds(body: AESRoundsRequest) -> AESRoundsResponse:
     for r in std_trace:
         standard_rounds.append(StandardRoundTrace(
             round=r["round"],
-            sub_bytes=r.get("sub_bytes"),
-            shift_rows=r.get("shift_rows"),
-            mix_columns=r.get("mix_columns"),
-            add_round_key=r.get("add_round_key"),
+            sub_bytes=hex_to_state_matrix(r.get("sub_bytes")),
+            shift_rows=hex_to_state_matrix(r.get("shift_rows")),
+            mix_columns=hex_to_state_matrix(r.get("mix_columns")),
+            add_round_key=hex_to_state_matrix(r.get("add_round_key")),
             round_key=r["round_key"]
         ))
     standard_aes = StandardAESTrace(rounds=standard_rounds)
@@ -105,22 +117,24 @@ async def analyze_aes_rounds(body: AESRoundsRequest) -> AESRoundsResponse:
             round=r["round"],
             lfsr_output=r.get("lfsr_output"),
             dynamic_round_key=r.get("dynamic_round_key"),
-            sub_bytes=r.get("sub_bytes"),
-            shift_rows=r.get("shift_rows"),
-            mix_columns=r.get("mix_columns"),
-            add_round_key=r.get("add_round_key")
+            sub_bytes=hex_to_state_matrix(r.get("sub_bytes")),
+            shift_rows=hex_to_state_matrix(r.get("shift_rows")),
+            mix_columns=hex_to_state_matrix(r.get("mix_columns")),
+            add_round_key=hex_to_state_matrix(r.get("add_round_key"))
         ))
     dynamic_aes = DynamicAESTrace(rounds=dynamic_rounds)
 
     # 7. Visualization Data
     round_labels = [f"Round {r['round']}" for r in std_trace]
-    standard_states = [r["add_round_key"] for r in std_trace]
-    dynamic_states = [r["add_round_key"] for r in dyn_trace]
+    standard_keys = [r["round_key"] for r in std_trace]
+    dynamic_keys = [r["dynamic_round_key"] for r in dyn_trace]
+    lfsr_values = [r["lfsr_output"] for r in dyn_trace]
 
     visualization = VisualizationData(
         round_labels=round_labels,
-        standard_states=standard_states,
-        dynamic_states=dynamic_states
+        standard_keys=standard_keys,
+        dynamic_keys=dynamic_keys,
+        lfsr_values=lfsr_values
     )
 
     return AESRoundsResponse(
